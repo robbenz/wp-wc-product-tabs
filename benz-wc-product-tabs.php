@@ -9,29 +9,34 @@ Author URI: robbenz.com
 License: GPL2
 */
 
-class Extension_For_WooCommerce {		  			
-    public function init() {						
-        add_action( 'admin_init', array( $this, 'start' ) );				
-        add_action( 'admin_init', array( $this, 'stop' ) );			
-    }
-    
-    private function woocommerce_is_active() {
-        #function woocommerce_is_active() {			
-        return is_plugin_active( 'woocommerce/woocommerce.php' );		
+if ( ! class_exists( 'Extension_For_WooCommerce' ) ) :
+    class Extension_For_WooCommerce {
+        public function init() {
+            add_action( 'admin_init', array( $this, 'start' ) );
+            add_action( 'admin_init', array( $this, 'stop' ) );
         }
-    
-    public function start() {
-        if ( ! $this->woocommerce_is_active() ) {
-            return;			
+        
+        private function woocommerce_is_active() {
+            return is_plugin_active( 'woocommerce/woocommerce.php' );
         }
-        include( plugin_dir_path( __FILE__ ) . 'benz-tabs-admin.php');
-        include( plugin_dir_path( __FILE__ ) . 'benz-tabs-frontend.php');
-    }
-    
-    public function stop() {
-        if ( ! $this->woocommerce_is_active() ) {
-            deactivate_plugins( plugin_basename( __FILE__ ) );
-            unset( $_GET['activate'] );
+        
+        public function start() {
+            if ( ! $this->woocommerce_is_active() ) {
+                return;
+            }
+include( plugin_dir_path( __FILE__ ) . 'benz-tabs-admin.php');
+include( plugin_dir_path( __FILE__ ) . 'benz-tabs-frontend.php');
+        }
+        
+        public function stop() {
+            if ( ! $this->woocommerce_is_active() ) {
+                deactivate_plugins( plugin_basename( __FILE__ ) );
+                unset( $_GET['activate'] );
+            }
         }
     }
-}
+add_action( 'init', 'Extension_For_WooCommerce', 0 );
+endif;
+
+#include( plugin_dir_path( __FILE__ ) . 'benz-tabs-admin.php');
+#include( plugin_dir_path( __FILE__ ) . 'benz-tabs-frontend.php');
