@@ -1,42 +1,35 @@
 <?php
 /*
-Plugin Name: BENZ SOMETHING ELSE 
+Plugin Name: BENZ SOMETHING ELSE
 Plugin URI: robbenz.com
-Description:  This plugin will add as many product tabs to your woocommerce product pages as needed. 
+Description:  This plugin will add as many product tabs to your woocommerce product pages as needed.
 Version: 1.0
 Author: Rob Benz
 Author URI: robbenz.com
 License: GPL2
 */
 
-if ( ! class_exists( 'Extension_For_WooCommerce' ) ) :
-    class Extension_For_WooCommerce {
-        public function init() {
-            add_action( 'admin_init', array( $this, 'start' ) );
-            add_action( 'admin_init', array( $this, 'stop' ) );
-        }
-        
-        private function woocommerce_is_active() {
-            return is_plugin_active( 'woocommerce/woocommerce.php' );
-        }
-        
-        public function start() {
-            if ( ! $this->woocommerce_is_active() ) {
-                return;
-            }
-include( plugin_dir_path( __FILE__ ) . 'benz-tabs-admin.php');
-include( plugin_dir_path( __FILE__ ) . 'benz-tabs-frontend.php');
-        }
-        
-        public function stop() {
-            if ( ! $this->woocommerce_is_active() ) {
-                deactivate_plugins( plugin_basename( __FILE__ ) );
-                unset( $_GET['activate'] );
-            }
+add_action( 'admin_init', 'benz_tabs_plugin_has_woo' );
+function benz_tabs_plugin_has_woo() {
+    if ( is_admin() && current_user_can( 'activate_plugins' ) &&  !is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+        add_action( 'admin_notices', 'benz_tabs_plugin_notice' );
+
+        deactivate_plugins( plugin_basename( __FILE__ ) );
+
+        if ( isset( $_GET['activate'] ) ) {
+            unset( $_GET['activate'] );
         }
     }
-add_action( 'init', 'Extension_For_WooCommerce', 0 );
-endif;
+}
 
-#include( plugin_dir_path( __FILE__ ) . 'benz-tabs-admin.php');
-#include( plugin_dir_path( __FILE__ ) . 'benz-tabs-frontend.php');
+function benz_tabs_plugin_notice(){
+    ?><div class="error"><p>Sorry, but Tabs for Woocommerce Poducts Plugin requires Woocommerce to be installed and active.</p></div><?php
+}
+
+add_action( 'admin_init', 'benz_tabs_includes' );
+function benz_tabs_includes() {
+  if ( is_plugin_active( plugin_basename( __FILE__ ) ) ) {
+    include( plugin_dir_path( __FILE__ ) . 'benz-tabs-admin.php');
+    include( plugin_dir_path( __FILE__ ) . 'benz-tabs-frontend.php');
+  }
+}
